@@ -1,6 +1,7 @@
 use alloc::collections::BTreeMap;
 use alloc::vec;
 use alloc::vec::Vec;
+use log::Level;
 use core::ops::{Range, RangeFrom};
 
 use anyhow::Result;
@@ -158,11 +159,12 @@ impl<F: RichField + Extendable<D>, C: GenericConfig<D, F = F>, const D: usize>
     }
 
     pub fn prove(&self, inputs: PartialWitness<F>) -> Result<ProofWithPublicInputs<F, C, D>> {
+        let mut timing = TimingTree::new("prove_process", Level::Trace);
         prove::<F, C, D>(
             &self.prover_only,
             &self.common,
             inputs,
-            &mut TimingTree::default(),
+            &mut timing
         )
     }
 
