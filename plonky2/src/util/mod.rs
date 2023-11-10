@@ -1,6 +1,9 @@
 use alloc::vec::Vec;
 
 use plonky2_maybe_rayon::*;
+// use plonky2_maybe_rayon::{current_num_threads, MaybeParChunksMut};
+// #[cfg(feature = "parallel")]
+// use plonky2_maybe_rayon::{IndexedParallelIterator, ParallelIterator};
 #[doc(inline)]
 pub use plonky2_util::*;
 
@@ -26,6 +29,59 @@ pub fn transpose<T: Send + Sync + Copy>(matrix: &[Vec<T>]) -> Vec<Vec<T>> {
         .map(|i| matrix.iter().map(|row| row[i]).collect())
         .collect()
 }
+
+// pub fn transpose<F: Field>(matrix: &[Vec<F>]) -> Vec<Vec<F>> {
+//     let l = matrix.len();
+//     let w = matrix[0].len();
+
+//     let mut transposed = vec![vec![]; w];
+//     for i in 0..w {
+//         transposed[i].reserve_exact(l);
+//         unsafe {
+//             // After .reserve_exact(l), transposed[i] will have capacity at least l. Hence,
+//             // set_len will not cause the buffer to overrun.
+//             transposed[i].set_len(l);
+//         }
+//     }
+
+//     #[cfg(feature = "parallel")]
+//     if w > l && w.is_power_of_two() {
+//         let batch_size = w / current_num_threads();
+//         if batch_size >= 128 {
+//             transposed
+//                 .par_chunks_mut(batch_size)
+//                 .enumerate()
+//                 .for_each(|(i, batch)| {
+//                     let batch_offset = i * batch_size;
+//                     for (k, row_buf) in batch.iter_mut().enumerate() {
+//                         let j = k + batch_offset;
+//                         for i in 0..l {
+//                             (*row_buf)[i] = matrix[i][j];
+//                         }
+//                     }
+//                 });
+//             return transposed;
+//         }
+//     }
+
+//     // Optimization: ensure the larger loop is outside.
+//     if w >= l {
+//         for i in 0..w {
+//             for j in 0..l {
+//                 transposed[i][j] = matrix[j][i];
+//             }
+//         }
+//     } else {
+//         for j in 0..l {
+//             for i in 0..w {
+//                 transposed[i][j] = matrix[j][i];
+//             }
+//         }
+//     }
+
+//     transposed
+// }
+
 
 pub(crate) fn reverse_bits(n: usize, num_bits: usize) -> usize {
     // NB: The only reason we need overflowing_shr() here as opposed
